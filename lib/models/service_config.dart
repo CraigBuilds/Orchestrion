@@ -43,7 +43,14 @@ class ServiceConfig {
 
   factory ServiceConfig.fromMap(Map<String, dynamic> map) {
     final rawRos = map['ros'];
-    final ros = rawRos != null ? Map<String, dynamic>.from(rawRos as Map) : null;
+    Map<String, dynamic>? ros;
+    if (rawRos is Map) {
+      ros = Map<String, dynamic>.from(rawRos);
+    } else if (rawRos != null) {
+      throw FormatException(
+        'Expected "ros" to be a map for service "${map['name']}", got ${rawRos.runtimeType}.',
+      );
+    }
     if (ros != null && (ros['package'] == null || ros['executable'] == null)) {
       throw ArgumentError(
         'ROS shorthand for "${map['name']}" requires both "package" and "executable".',

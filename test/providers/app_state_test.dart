@@ -144,14 +144,22 @@ void main() {
       expect(logs, isNotEmpty);
     });
 
-    test('clearError clears the error', () async {
-      await appState.loadConfigs(testConfigs);
-      // Trigger an error by calling an action that might fail
-      // Since mock won't fail, set error indirectly via the getter check
+    test('clearError clears the error and notifies listeners', () async {
+      var notified = false;
+      appState.addListener(() => notified = true);
+
+      // Verify initial state
       expect(appState.error, isNull);
-      // clearError should work even if there's no error
+
+      // Load configs (this installs services via mock - no error expected)
+      await appState.loadConfigs(testConfigs);
+      expect(appState.error, isNull);
+
+      // clearError notifies even if no error was set
+      notified = false;
       appState.clearError();
       expect(appState.error, isNull);
+      expect(notified, true);
     });
   });
 }
