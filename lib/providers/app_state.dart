@@ -158,12 +158,20 @@ class AppState extends ChangeNotifier {
   }
 
   /// Export systemd unit files for all loaded configs to [outputDir].
-  Future<void> exportServices(String outputDir) async {
+  ///
+  /// Returns `true` if the export succeeds, or `false` if it fails. On
+  /// failure, [_error] is set and listeners are notified.
+  Future<bool> exportServices(String outputDir) async {
+    // Clear any previous error before attempting a new export.
+    _error = null;
+    notifyListeners();
     try {
       await _serviceManager.exportServices(_configs, outputDir);
+      return true;
     } catch (e) {
       _error = 'Failed to export services: $e';
       notifyListeners();
+      return false;
     }
   }
 
