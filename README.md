@@ -4,6 +4,8 @@ A Flutter UI for managing multiple `systemd` services from one place.
 
 Load a YAML config, see all your services at a glance, and start/stop/restart them individually or all at once — with colour-coded status and live log output.
 
+**[Live demo on GitHub Pages](https://CraigBuilds.github.io/Orchestrion/)** (uses mock services)
+
 ## Features
 
 - **Config-driven**: define services in a simple YAML file
@@ -88,7 +90,6 @@ Sensible follow-up improvements (not built yet):
 
 - **Persist config path**: remember the last loaded config file
 - **Auto-load config**: load a default config on startup (e.g. from `~/.config/orchestrion/config.yaml`)
-- **GitHub Pages deployment**: CI step to deploy web build to GitHub Pages
 - **Real systemd integration toggle**: UI switch between mock and real service manager on desktop
 - **Service dependency ordering**: define startup order between services
 - **Search/filter**: filter services by name, system, or type
