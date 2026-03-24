@@ -139,5 +139,35 @@ void main() {
       expect(restored.rosExecutable, original.rosExecutable);
       expect(restored.rosArgs, original.rosArgs);
     });
+
+    test('throws if ROS shorthand is missing executable', () {
+      expect(
+        () => ServiceConfig.fromMap({
+          'name': 'Bad ROS',
+          'system': 'sys',
+          'service_type': 'type',
+          'ros': {
+            'package': 'pkg',
+          },
+        }),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('handles YamlMap-style ros map (dynamic keys)', () {
+      // Simulate what YAML parsing produces: Map<dynamic, dynamic>
+      final yamlLikeMap = <dynamic, dynamic>{
+        'package': 'cam_pkg',
+        'executable': 'cam_node',
+      };
+      final config = ServiceConfig.fromMap({
+        'name': 'YAML ROS',
+        'system': 'sys',
+        'service_type': 'type',
+        'ros': yamlLikeMap,
+      });
+      expect(config.rosPackage, 'cam_pkg');
+      expect(config.rosExecutable, 'cam_node');
+    });
   });
 }

@@ -13,7 +13,13 @@ class SystemdServiceManager implements ServiceManager {
 
   @override
   Future<void> install(ServiceConfig config) async {
-    final unitDir = '${Platform.environment['HOME']}/.config/systemd/user';
+    final homeDir = Platform.environment['HOME'];
+    if (homeDir == null || homeDir.isEmpty) {
+      throw StateError(
+        'Cannot install systemd user service: HOME environment variable is not set.',
+      );
+    }
+    final unitDir = '$homeDir/.config/systemd/user';
     await Directory(unitDir).create(recursive: true);
 
     final unitContent = '''

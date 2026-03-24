@@ -21,6 +21,7 @@ class AppState extends ChangeNotifier {
   GroupMode _groupMode = GroupMode.bySystem;
   Timer? _pollTimer;
   String? _error;
+  bool _refreshing = false;
 
   AppState(this._serviceManager, {this.enablePolling = true});
 
@@ -58,6 +59,12 @@ class AppState extends ChangeNotifier {
   /// All unique service types.
   Set<String> get serviceTypes => _configs.map((c) => c.serviceType).toSet();
 
+  /// Clear the current error message.
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
   // -- Actions --
 
   void setGroupMode(GroupMode mode) {
@@ -90,10 +97,16 @@ class AppState extends ChangeNotifier {
 
   /// Refresh the status of all services.
   Future<void> refreshAll() async {
-    for (final config in _configs) {
-      await _refreshStatus(config.name);
+    if (_refreshing) return;
+    _refreshing = true;
+    try {
+      for (final config in _configs) {
+        await _refreshStatus(config.name);
+      }
+      notifyListeners();
+    } finally {
+      _refreshing = false;
     }
-    notifyListeners();
   }
 
   Future<void> startService(String name) async {

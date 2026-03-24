@@ -42,7 +42,13 @@ class ServiceConfig {
       'orchestrion-${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-')}.service';
 
   factory ServiceConfig.fromMap(Map<String, dynamic> map) {
-    final ros = map['ros'] as Map<String, dynamic>?;
+    final rawRos = map['ros'];
+    final ros = rawRos != null ? Map<String, dynamic>.from(rawRos as Map) : null;
+    if (ros != null && (ros['package'] == null || ros['executable'] == null)) {
+      throw ArgumentError(
+        'ROS shorthand for "${map['name']}" requires both "package" and "executable".',
+      );
+    }
     return ServiceConfig(
       name: map['name'] as String,
       system: map['system'] as String,

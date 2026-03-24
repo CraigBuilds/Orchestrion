@@ -1,24 +1,14 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_state.dart';
 import 'screens/home_screen.dart';
-import 'services/mock_service_manager.dart';
 import 'services/service_manager.dart';
+import 'services/service_manager_factory.dart'
+    if (dart.library.io) 'services/service_manager_factory_io.dart';
 
 void main() {
-  final ServiceManager serviceManager;
-
-  if (kIsWeb) {
-    // Always use mock on web
-    serviceManager = MockServiceManager();
-  } else {
-    // On desktop, use mock for now; swap to SystemdServiceManager when ready
-    serviceManager = MockServiceManager();
-  }
-
-  runApp(OrchestrionApp(serviceManager: serviceManager));
+  runApp(OrchestrionApp(serviceManager: createServiceManager()));
 }
 
 class OrchestrionApp extends StatelessWidget {
