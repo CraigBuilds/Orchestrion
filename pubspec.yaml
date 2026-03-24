@@ -1,0 +1,22 @@
+name: orchestrion
+description: A UI over systemd for starting, stopping, monitoring, and viewing logs for managed services.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  yaml: ^3.1.3
+  provider: ^6.1.2
+  file_picker: ^8.0.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
