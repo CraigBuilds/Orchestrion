@@ -94,22 +94,46 @@ WantedBy=default.target
     final unitName = _toUnitName(serviceName);
     final controller = StreamController<String>();
 
-    Process.start(
-      'journalctl',
-      ['--user', '-u', unitName, '-f', '--no-pager'],
-    ).then((process) {
-      _logProcesses[serviceName] = process;
-      process.stdout.transform(const SystemEncoding().decoder).listen(
-        (data) {
-          for (final line in data.split('\n')) {
-            if (line.isNotEmpty) controller.add(line);
-          }
-        },
-        onDone: () => controller.close(),
-        onError: (e) => controller.addError(e),
-      );
-    });
+    () async {
+      try {
+        final process = await Process.start(
+          'journalctl',
+          ['--user', '-u', unitName, '-f', '--no-pager'],
+        );
+        _logProcesses[serviceName] = process;
 
+        // Forward stdout lines to the stream.
+        process.stdout.transform(const SystemEncoding().decoder).listen(
+          (data) {
+            for (final line in data.split('\n')) {
+              if (line.isNotEmpty) controller.add(line);
+            }
+          },
+          onDone: () => controller.close(),
+          onError: (e, st) => controller.addError(e, st),
+        );
+
+        // Forward stderr as errors for easier debugging.
+        process.stderr.transform(const SystemEncoding().decoder).listen(
+          (data) {
+            final errorOutput = data.trim();
+            if (errorOutput.isNotEmpty) {
+              controller.addError(
+                ProcessException(
+                  'journalctl',
+                  ['--user', '-u', unitName, '-f', '--no-pager'],
+                  errorOutput,
+                ),
+              );
+            }
+          },
+        );
+      } catch (e, st) {
+        // Handle failures from Process.start so the stream does not hang.
+        controller.addError(e, st);
+        await controller.close();
+      }
+    }();
     controller.onCancel = () {
       _logProcesses[serviceName]?.kill();
       _logProcesses.remove(serviceName);
