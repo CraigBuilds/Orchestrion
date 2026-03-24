@@ -6,6 +6,10 @@ Load a YAML config, see all your services at a glance, and start/stop/restart th
 
 **[Live demo on GitHub Pages](https://CraigBuilds.github.io/Orchestrion/)** (uses mock services)
 
+## Screenshot
+
+![Orchestrion UI showing services grouped by system with status and controls](docs/screenshot.png)
+
 ## Features
 
 - **Config-driven**: define services in a simple YAML file
