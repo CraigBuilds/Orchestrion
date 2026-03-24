@@ -1,0 +1,65 @@
+# Orchestrion example config
+#
+# This file describes the services managed by Orchestrion.
+# Each service needs a name, system, service_type, and either
+# a command or ROS shorthand (ros.package + ros.executable).
+
+services:
+  # -- Perception system --
+  - name: Camera Driver
+    system: perception
+    service_type: sensor
+    start_all: true
+    command: "python3 /opt/drivers/camera_driver.py"
+
+  - name: Lidar Driver
+    system: perception
+    service_type: sensor
+    start_all: true
+    ros:
+      package: lidar_driver
+      executable: lidar_node
+      args: "--frequency 10"
+
+  - name: Object Detector
+    system: perception
+    service_type: processing
+    start_all: true
+    command: "python3 /opt/perception/detector.py --model yolov8"
+
+  # -- Navigation system --
+  - name: Localisation
+    system: navigation
+    service_type: processing
+    start_all: true
+    ros:
+      package: nav_stack
+      executable: localisation_node
+
+  - name: Path Planner
+    system: navigation
+    service_type: processing
+    start_all: true
+    ros:
+      package: nav_stack
+      executable: planner_node
+      args: "--global"
+
+  - name: Motor Controller
+    system: navigation
+    service_type: actuator
+    start_all: true
+    command: "/opt/drivers/motor_controller --can-bus can0"
+
+  # -- Monitoring system --
+  - name: Health Monitor
+    system: monitoring
+    service_type: monitoring
+    start_all: true
+    command: "python3 /opt/monitoring/health_check.py"
+
+  - name: Log Aggregator
+    system: monitoring
+    service_type: monitoring
+    start_all: false
+    command: "python3 /opt/monitoring/log_aggregator.py"
