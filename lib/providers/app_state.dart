@@ -157,6 +157,16 @@ class AppState extends ChangeNotifier {
     return _serviceManager.streamLogs(name);
   }
 
+  /// Export systemd unit files for all loaded configs to [outputDir].
+  Future<void> exportServices(String outputDir) async {
+    try {
+      await _serviceManager.exportServices(_configs, outputDir);
+    } catch (e) {
+      _error = 'Failed to export services: $e';
+      notifyListeners();
+    }
+  }
+
   // -- Internal --
 
   Future<void> _refreshStatus(String name) async {

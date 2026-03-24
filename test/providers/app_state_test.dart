@@ -161,5 +161,27 @@ void main() {
       expect(appState.error, isNull);
       expect(notified, true);
     });
+
+    test('exportServices delegates to service manager with loaded configs',
+        () async {
+      await appState.loadConfigs(testConfigs);
+      await appState.exportServices('/tmp/test-export');
+
+      expect(manager.exportCalls, hasLength(1));
+      expect(manager.exportCalls.first.outputDir, '/tmp/test-export');
+      expect(
+        manager.exportCalls.first.configs.map((c) => c.name),
+        containsAll(['Camera', 'Lidar', 'Planner', 'Logger']),
+      );
+    });
+
+    test('exportServices sets error when service manager throws', () async {
+      await appState.loadConfigs(testConfigs);
+      manager.throwOnExport = true;
+
+      await appState.exportServices('/tmp/test-export');
+
+      expect(appState.error, contains('Failed to export services'));
+    });
   });
 }

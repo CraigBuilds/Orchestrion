@@ -15,6 +15,12 @@ class MockServiceManager implements ServiceManager {
   final Map<String, Timer> _logTimers = {};
   final _random = Random();
 
+  /// Records of each [exportServices] call for test assertions.
+  final List<({List<ServiceConfig> configs, String outputDir})> exportCalls = [];
+
+  /// When true, [exportServices] throws an exception.
+  bool throwOnExport = false;
+
   @override
   Future<void> install(ServiceConfig config) async {
     _statuses[config.name] = ServiceStatus.stopped;
@@ -64,6 +70,15 @@ class MockServiceManager implements ServiceManager {
   Stream<String> streamLogs(String serviceName) {
     _logStreams[serviceName] ??= StreamController<String>.broadcast();
     return _logStreams[serviceName]!.stream;
+  }
+
+  @override
+  Future<void> exportServices(
+    List<ServiceConfig> configs,
+    String outputDir,
+  ) async {
+    if (throwOnExport) throw Exception('mock export failure');
+    exportCalls.add((configs: List.unmodifiable(configs), outputDir: outputDir));
   }
 
   @override

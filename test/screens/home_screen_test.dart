@@ -19,11 +19,17 @@ void main() {
       manager.dispose();
     });
 
-    Widget createTestApp({Future<String?> Function()? onLoadConfig}) {
+    Widget createTestApp({
+      Future<String?> Function()? onLoadConfig,
+      Future<String?> Function()? onPickExportDir,
+    }) {
       return MaterialApp(
         home: ChangeNotifierProvider(
           create: (_) => AppState(manager, enablePolling: false),
-          child: HomeScreen(onLoadConfig: onLoadConfig),
+          child: HomeScreen(
+            onLoadConfig: onLoadConfig,
+            onPickExportDir: onPickExportDir,
+          ),
         ),
       );
     }
@@ -112,6 +118,78 @@ services:
 
       // Start All button should be present
       expect(find.text('Start All'), findsOneWidget);
+    });
+
+    testWidgets('export button is disabled with no configs loaded',
+        (tester) async {
+      await tester.pumpWidget(createTestApp());
+      await tester.pumpAndSettle();
+
+      final exportButton = find.byWidgetPredicate(
+        (w) => w is IconButton && (w.tooltip == 'Export services'),
+      );
+      expect(exportButton, findsOneWidget);
+      // onPressed is null when configs is empty → button is disabled.
+      final btn = tester.widget<IconButton>(exportButton);
+      expect(btn.onPressed, isNull);
+    });
+
+    testWidgets('export button is enabled after loading config', (tester) async {
+      const yaml = '''
+services:
+  - name: Svc1
+    system: sys
+    service_type: type
+    command: "echo test"
+''';
+
+      await tester.pumpWidget(createTestApp(
+        onLoadConfig: () async => yaml,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Load Config'));
+      await tester.pumpAndSettle();
+
+      final exportButton = find.byWidgetPredicate(
+        (w) => w is IconButton && (w.tooltip == 'Export services'),
+      );
+      final btn = tester.widget<IconButton>(exportButton);
+      expect(btn.onPressed, isNotNull);
+    });
+
+    testWidgets('tapping export button invokes onPickExportDir callback',
+        (tester) async {
+      const yaml = '''
+services:
+  - name: Svc1
+    system: sys
+    service_type: type
+    command: "echo test"
+''';
+
+      bool pickerCalled = false;
+
+      await tester.pumpWidget(createTestApp(
+        onLoadConfig: () async => yaml,
+        onPickExportDir: () async {
+          pickerCalled = true;
+          return '/tmp/test-export';
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Load Config'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is IconButton && w.tooltip == 'Export services',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(pickerCalled, isTrue);
     });
 
     testWidgets('OrchestrionApp widget renders', (tester) async {
