@@ -4,6 +4,10 @@ A Flutter UI for managing multiple `systemd` services from one place.
 
 Load a YAML config, see all your services at a glance, and start/stop/restart them individually or all at once — with colour-coded status and live log output.
 
+## Screenshot
+
+![Orchestrion UI showing services grouped by system with status and controls](docs/screenshot.png)
+
 ## Features
 
 - **Config-driven**: define services in a simple YAML file
