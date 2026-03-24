@@ -12,7 +12,13 @@ class HomeScreen extends StatelessWidget {
   /// Optional callback for loading config (used in tests to inject config).
   final Future<String?> Function()? onLoadConfig;
 
-  const HomeScreen({super.key, this.onLoadConfig});
+  /// Optional callback for picking the export directory (used in tests).
+  ///
+  /// Should return the chosen output directory path, or `null` to cancel.
+  /// When null, [HomeScreen] opens a native directory picker.
+  final Future<String?> Function()? onPickExportDir;
+
+  const HomeScreen({super.key, this.onLoadConfig, this.onPickExportDir});
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +57,15 @@ class HomeScreen extends StatelessWidget {
                 label: const Text('Start All'),
               ),
               const SizedBox(width: 8),
+              // Export services button
+              IconButton(
+                icon: const Icon(Icons.upload),
+                tooltip: 'Export services',
+                onPressed: appState.configs.isEmpty
+                    ? null
+                    : () => _exportServices(context, appState),
+              ),
+              const SizedBox(width: 4),
               // Load config button
               IconButton(
                 icon: const Icon(Icons.folder_open),
@@ -132,6 +147,30 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _exportServices(BuildContext context, AppState appState) async {
+    try {
+      final String? outputDir;
+      if (onPickExportDir != null) {
+        outputDir = await onPickExportDir!();
+      } else {
+        outputDir = await FilePicker.platform.getDirectoryPath();
+      }
+      if (outputDir == null) return; // user cancelled
+      await appState.exportServices(outputDir);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Services exported to $outputDir')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to export services: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _loadConfig(BuildContext context) async {

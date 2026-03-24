@@ -3,6 +3,7 @@ import 'dart:io';
 
 import '../models/service_config.dart';
 import '../models/service_state.dart';
+import 'service_exporter.dart';
 import 'service_manager.dart';
 
 /// Real systemd-based implementation of [ServiceManager].
@@ -22,22 +23,18 @@ class SystemdServiceManager implements ServiceManager {
     final unitDir = '$homeDir/.config/systemd/user';
     await Directory(unitDir).create(recursive: true);
 
-    final unitContent = '''
-[Unit]
-Description=Orchestrion: ${config.name}
-
-[Service]
-Type=simple
-ExecStart=${config.effectiveCommand}
-Restart=no
-
-[Install]
-WantedBy=default.target
-''';
-
+    final unitContent = ServiceExporter.generateUnitContent(config);
     final unitPath = '$unitDir/${config.unitName}';
     await File(unitPath).writeAsString(unitContent);
     await _runSystemctl(['daemon-reload']);
+  }
+
+  @override
+  Future<void> exportServices(
+    List<ServiceConfig> configs,
+    String outputDir,
+  ) async {
+    await ServiceExporter.exportServices(configs, outputDir);
   }
 
   @override

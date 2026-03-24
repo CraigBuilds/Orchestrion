@@ -26,6 +26,9 @@ abstract class ServiceManager {
   /// Stream of log lines for a service (for live tailing).
   Stream<String> streamLogs(String serviceName);
 
+  /// Export systemd unit files for [configs] to [outputDir].
+  Future<void> exportServices(List<ServiceConfig> configs, String outputDir);
+
   /// Dispose any resources held by this manager.
   void dispose();
 }
