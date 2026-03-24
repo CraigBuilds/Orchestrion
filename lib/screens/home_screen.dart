@@ -103,7 +103,7 @@ class HomeScreen extends StatelessWidget {
             backgroundColor: Colors.red[50],
             actions: [
               TextButton(
-                onPressed: () {}, // Error clears on next action
+                onPressed: () => appState.clearError(),
                 child: const Text('DISMISS'),
               ),
             ],
