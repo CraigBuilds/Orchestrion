@@ -67,8 +67,14 @@ class AppState extends ChangeNotifier {
 
   /// Load configs and install services.
   Future<void> loadConfigs(List<ServiceConfig> configs) async {
+    // Reset any existing polling before loading new configs.
+    _pollTimer?.cancel();
+    _pollTimer = null;
+
     _configs = configs;
     _error = null;
+    // Clear existing states to avoid exposing stale entries for removed services.
+    _states.clear();
     for (final config in configs) {
       _states[config.name] = ServiceState(serviceName: config.name);
       try {
