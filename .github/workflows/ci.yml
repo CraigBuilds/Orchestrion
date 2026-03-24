@@ -28,6 +28,40 @@ jobs:
       - name: Run tests
         run: flutter test
 
+  test-ros2:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ROS2 Jazzy
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+
+      - name: Install demo_nodes_cpp
+        run: sudo apt-get install -y ros-jazzy-demo-nodes-cpp
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Start systemd user session
+        run: |
+          sudo mkdir -p /run/user/$(id -u)
+          sudo chown $(id -u):$(id -g) /run/user/$(id -u)
+          sudo chmod 0700 /run/user/$(id -u)
+          sudo systemctl start user@$(id -u).service
+          sleep 2
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> $GITHUB_ENV
+
+      - name: Run ROS2 integration tests
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          flutter test test/integration/ros2_integration_test.dart --timeout 30s
+
   build-web:
     runs-on: ubuntu-latest
     needs: test
