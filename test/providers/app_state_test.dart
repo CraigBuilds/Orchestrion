@@ -43,7 +43,7 @@ void main() {
 
     setUp(() {
       manager = MockServiceManager();
-      appState = AppState(manager);
+      appState = AppState(manager, enablePolling: false);
     });
 
     tearDown(() {

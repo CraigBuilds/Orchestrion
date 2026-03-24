@@ -14,6 +14,7 @@ enum GroupMode { bySystem, byServiceType }
 /// Manages service configs, states, and interactions with the [ServiceManager].
 class AppState extends ChangeNotifier {
   final ServiceManager _serviceManager;
+  final bool enablePolling;
 
   List<ServiceConfig> _configs = [];
   final Map<String, ServiceState> _states = {};
@@ -21,7 +22,7 @@ class AppState extends ChangeNotifier {
   Timer? _pollTimer;
   String? _error;
 
-  AppState(this._serviceManager);
+  AppState(this._serviceManager, {this.enablePolling = true});
 
   // -- Getters --
 
@@ -154,6 +155,7 @@ class AppState extends ChangeNotifier {
   }
 
   void _startPolling() {
+    if (!enablePolling) return;
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       refreshAll();

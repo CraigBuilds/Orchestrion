@@ -16,7 +16,7 @@ void main() {
       manager.dispose();
     });
 
-    ServiceConfig _makeConfig(String name) {
+    ServiceConfig makeConfig(String name) {
       return ServiceConfig.fromMap({
         'name': name,
         'system': 'test',
@@ -26,20 +26,20 @@ void main() {
     }
 
     test('install sets status to stopped', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       final status = await manager.getStatus('svc1');
       expect(status, ServiceStatus.stopped);
     });
 
     test('start transitions to running', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       await manager.start('svc1');
       final status = await manager.getStatus('svc1');
       expect(status, ServiceStatus.running);
     });
 
     test('stop transitions to stopped', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       await manager.start('svc1');
       await manager.stop('svc1');
       final status = await manager.getStatus('svc1');
@@ -47,14 +47,14 @@ void main() {
     });
 
     test('restart results in running', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       await manager.restart('svc1');
       final status = await manager.getStatus('svc1');
       expect(status, ServiceStatus.running);
     });
 
     test('getLogs returns logged messages', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       await manager.start('svc1');
       final logs = await manager.getLogs('svc1');
       expect(logs, isNotEmpty);
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('streamLogs emits log lines', () async {
-      await manager.install(_makeConfig('svc1'));
+      await manager.install(makeConfig('svc1'));
       final stream = manager.streamLogs('svc1');
 
       final lines = <String>[];
@@ -82,8 +82,8 @@ void main() {
     });
 
     test('multiple services are independent', () async {
-      await manager.install(_makeConfig('svc1'));
-      await manager.install(_makeConfig('svc2'));
+      await manager.install(makeConfig('svc1'));
+      await manager.install(makeConfig('svc2'));
       await manager.start('svc1');
 
       expect(await manager.getStatus('svc1'), ServiceStatus.running);

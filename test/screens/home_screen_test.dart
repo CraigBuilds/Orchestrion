@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:orchestrion/main.dart';
-import 'package:orchestrion/models/service_config.dart';
 import 'package:orchestrion/providers/app_state.dart';
 import 'package:orchestrion/screens/home_screen.dart';
 import 'package:orchestrion/services/mock_service_manager.dart';
@@ -23,7 +22,7 @@ void main() {
     Widget createTestApp({Future<String?> Function()? onLoadConfig}) {
       return MaterialApp(
         home: ChangeNotifierProvider(
-          create: (_) => AppState(manager),
+          create: (_) => AppState(manager, enablePolling: false),
           child: HomeScreen(onLoadConfig: onLoadConfig),
         ),
       );
